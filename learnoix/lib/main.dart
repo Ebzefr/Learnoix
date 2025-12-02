@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'screens/home_screen.dart';
+import 'utils/theme.dart';
+import 'screens/auth/splash_screen.dart';
 
 void main() {
   runApp(const LearnoixApp());
@@ -13,11 +14,10 @@ class LearnoixApp extends StatelessWidget {
     return MaterialApp(
       title: 'Learnoix',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-        useMaterial3: true,
-      ),
-      home: const HomeScreen(),
+      theme: AppTheme.lightTheme,
+      darkTheme: AppTheme.darkTheme,
+      themeMode: ThemeMode.system, // Respects system preference
+      home: const SplashScreen(),
     );
   }
 }
