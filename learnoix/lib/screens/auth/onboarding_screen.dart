@@ -440,7 +440,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     Expanded(
                       flex: 55,
                       child: Container(
-                        color: isDark ? AppColors.darkBackground : Colors.white,
+                        color: isDark ? const Color(0xFF121212) : Colors.white,
                         child: Stack(
                           children: [
                             Positioned.fill(
