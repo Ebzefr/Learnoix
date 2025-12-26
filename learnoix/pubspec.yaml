@@ -9,17 +9,38 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  device_preview: ^1.1.0
+
   
   firebase_core: ^3.8.1
   firebase_auth: ^5.3.4
   cloud_firestore: ^5.5.2
   firebase_storage: ^12.3.8
+
+  # OpenAI and Document process
+  http: ^1.1.2
+  flutter_dotenv: ^5.1.0
+  file_picker: ^6.1.1
+  syncfusion_flutter_pdf: ^24.1.41  
+  archive: ^3.4.10
+
+
+  # Google Sign-In
+  google_sign_in: ^6.2.1
+  google_sign_in_web: ^0.12.4+2
   
   # UI
   cupertino_icons: ^1.0.8
   google_fonts: ^6.2.1
   animated_text_kit: ^4.2.2 
   smooth_page_indicator: ^1.2.0+3  
+  flutter_svg: ^2.0.10
+  connectivity_plus: ^5.0.2
+  font_awesome_flutter: ^10.7.0
+  flutter_slidable: ^3.0.1
+  confetti: ^0.7.0
+
+
   
 dev_dependencies:
   flutter_test:
@@ -32,3 +53,7 @@ flutter:
   assets:
     - assets/images/
     - assets/patterns/
+    - assets/avatar/ 
+    - assets/medals/
+    - assets/reward/ 
+    - .env
