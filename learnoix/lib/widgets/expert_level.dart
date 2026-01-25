@@ -3,7 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
 
 class ExpertLevelCard extends StatelessWidget {
-  final int userXP; // User's current XP points
+  final int userXP;
   final bool isTablet;
   final bool isDesktop;
 
@@ -16,7 +16,7 @@ class ExpertLevelCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Define all medal levels with their data
+    // All medal levels with their data
     final medals = [
       {
         'label': 'Freshmind',
@@ -60,7 +60,22 @@ class ExpertLevelCard extends StatelessWidget {
       },
     ];
 
-    // Calculate sizes based on screen type
+    // Find next level to unlock
+    String nextLevelName = 'Mastermind';
+    String nextLevelType = 'Diamond';
+    int xpNeeded = 0;
+
+    for (int i = 0; i < medals.length; i++) {
+      final threshold = medals[i]['xpThreshold'] as int;
+      if (userXP < threshold) {
+        nextLevelName = medals[i]['label'] as String;
+        nextLevelType = medals[i]['level'] as String;
+        xpNeeded = threshold - userXP;
+        break;
+      }
+    }
+
+    // Responsive sizes
     EdgeInsets cardPadding;
     if (isDesktop) {
       cardPadding = const EdgeInsets.symmetric(horizontal: 40, vertical: 28);
@@ -119,7 +134,6 @@ class ExpertLevelCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Title
           Text(
             'Expert Level',
             style: GoogleFonts.dmSans(
@@ -131,203 +145,224 @@ class ExpertLevelCard extends StatelessWidget {
           SizedBox(height: verticalSpacing),
 
           // Medals with progress lines
-          buildMedalsWithProgress(context, medals),
-        ],
-      ),
-    );
-  }
+          // Using LayoutBuilder to calculate responsive medal sizes
+          // Reference: https://api.flutter.dev/flutter/widgets/LayoutBuilder-class.html
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final availableWidth = constraints.maxWidth;
+              final medalCount = medals.length;
 
-  // Build medals row with connecting lines
-  Widget buildMedalsWithProgress(
-    BuildContext context,
-    List<Map<String, dynamic>> medals,
-  ) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final availableWidth = constraints.maxWidth;
-        final medalCount = medals.length;
+              final minSpacing = 8.0;
+              double maxMedalSize;
+              if (isDesktop) {
+                maxMedalSize = 100.0;
+              } else if (isTablet) {
+                maxMedalSize = 80.0;
+              } else {
+                maxMedalSize = 64.0;
+              }
 
-        // Calculate medal size
-        final minSpacing = 8.0;
-        double maxMedalSize;
-        if (isDesktop) {
-          maxMedalSize = 100.0;
-        } else if (isTablet) {
-          maxMedalSize = 80.0;
-        } else {
-          maxMedalSize = 64.0;
-        }
+              double medalSize =
+                  (availableWidth - (minSpacing * (medalCount - 1))) /
+                      medalCount;
 
-        // Calculate how big each medal can be
-        double medalSize =
-            (availableWidth - (minSpacing * (medalCount - 1))) / medalCount;
+              if (medalSize < 40.0) {
+                medalSize = 40.0;
+              }
+              if (medalSize > maxMedalSize) {
+                medalSize = maxMedalSize;
+              }
 
-        // Make sure medal isn't too small or too big
-        if (medalSize < 40.0) {
-          medalSize = 40.0;
-        }
-        if (medalSize > maxMedalSize) {
-          medalSize = maxMedalSize;
-        }
+              final actualSpacing =
+                  (availableWidth - (medalSize * medalCount)) /
+                      (medalCount - 1);
 
-        // Calculate actual spacing between medals
-        final actualSpacing =
-            (availableWidth - (medalSize * medalCount)) / (medalCount - 1);
+              final medalPadding = medalSize * 0.12;
 
-        final medalPadding = medalSize * 0.12;
+              double labelFontSize;
+              if (isDesktop) {
+                labelFontSize = 13.0;
+              } else if (isTablet) {
+                labelFontSize = 11.0;
+              } else {
+                if (medalSize < 50) {
+                  labelFontSize = 9.0;
+                } else {
+                  labelFontSize = 10.0;
+                }
+              }
 
-        // Calculate label font size
-        double labelFontSize;
-        if (isDesktop) {
-          labelFontSize = 13.0;
-        } else if (isTablet) {
-          labelFontSize = 11.0;
-        } else {
-          if (medalSize < 50) {
-            labelFontSize = 9.0;
-          } else {
-            labelFontSize = 10.0;
-          }
-        }
+              double labelSpacing;
+              if (isDesktop) {
+                labelSpacing = 10.0;
+              } else if (isTablet) {
+                labelSpacing = 8.0;
+              } else {
+                labelSpacing = 6.0;
+              }
 
-        double labelSpacing;
-        if (isDesktop) {
-          labelSpacing = 10.0;
-        } else if (isTablet) {
-          labelSpacing = 8.0;
-        } else {
-          labelSpacing = 6.0;
-        }
+              final lineTop = medalSize / 2;
 
-        final lineTop = medalSize / 2; // Center of medal
-
-        return Column(
-          children: [
-            // Container for medals and lines
-            SizedBox(
-              height: medalSize,
-              child: Stack(
+              return Column(
                 children: [
-                  // Draw connecting lines between medals
-                  ...List.generate(medalCount - 1, (index) {
-                    final currentMedal = medals[index];
+                  SizedBox(
+                    height: medalSize,
+                    child: Stack(
+                      children: [
+                        // Connecting lines between medals
+                        ...List.generate(medalCount - 1, (index) {
+                          final currentMedal = medals[index];
 
-                    // Calculate line start and end positions
-                    final startX =
-                        (medalSize / 2) + (index * (medalSize + actualSpacing));
-                    final endX = (medalSize / 2) +
-                        ((index + 1) * (medalSize + actualSpacing));
+                          final startX = (medalSize / 2) +
+                              (index * (medalSize + actualSpacing));
+                          final endX = (medalSize / 2) +
+                              ((index + 1) * (medalSize + actualSpacing));
 
-                    // Check if current level is unlocked
-                    final isUnlocked =
-                        userXP >= (currentMedal['xpThreshold'] as int);
+                          final threshold = currentMedal['xpThreshold'] as int;
+                          final isUnlocked = userXP >= threshold;
 
-                    Color lineColor;
-                    if (isUnlocked) {
-                      lineColor = currentMedal['strokeColor'] as Color;
-                    } else {
-                      lineColor = Colors.white.withOpacity(0.4);
-                    }
+                          Color lineColor;
+                          if (isUnlocked) {
+                            lineColor = currentMedal['strokeColor'] as Color;
+                          } else {
+                            lineColor = Colors.white.withOpacity(0.4);
+                          }
 
-                    return Positioned(
-                      left: startX,
-                      top: lineTop - 2, // Center line vertically (height is 4)
-                      child: Container(
-                        width: endX - startX,
-                        height: 4,
-                        decoration: BoxDecoration(
-                          color: lineColor,
-                          borderRadius: BorderRadius.circular(2),
+                          return Positioned(
+                            left: startX,
+                            top: lineTop - 2,
+                            child: Container(
+                              width: endX - startX,
+                              height: 4,
+                              decoration: BoxDecoration(
+                                color: lineColor,
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          );
+                        }),
+
+                        // Medals row
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: medals.map((medal) {
+                            final xpThreshold = medal['xpThreshold'] as int;
+                            final isUnlocked = userXP >= xpThreshold;
+                            final fillColor = medal['fillColor'] as Color;
+                            final strokeColor = medal['strokeColor'] as Color;
+
+                            return Container(
+                              width: medalSize,
+                              height: medalSize,
+                              decoration: BoxDecoration(
+                                color: isUnlocked ? fillColor : Colors.white,
+                                shape: BoxShape.circle,
+                                border: Border.all(
+                                  color: isUnlocked
+                                      ? strokeColor
+                                      : Colors.white.withOpacity(0.5),
+                                  width: medalSize > 50 ? 3 : 2,
+                                ),
+                              ),
+                              padding: EdgeInsets.all(medalPadding),
+                              child: Opacity(
+                                opacity: isUnlocked ? 1.0 : 0.5,
+                                child: Image.asset(
+                                  'assets/medals/${medal['image']}',
+                                  fit: BoxFit.contain,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return Icon(
+                                      Icons.emoji_events_outlined,
+                                      color: isUnlocked
+                                          ? strokeColor
+                                          : Colors.grey.shade400,
+                                      size: medalSize * 0.5,
+                                    );
+                                  },
+                                ),
+                              ),
+                            );
+                          }).toList(),
                         ),
-                      ),
-                    );
-                  }),
+                      ],
+                    ),
+                  ),
+                  SizedBox(height: labelSpacing),
 
-                  // Medals in a row
+                  // Labels row
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: medals.map((medal) {
                       final xpThreshold = medal['xpThreshold'] as int;
                       final isUnlocked = userXP >= xpThreshold;
 
-                      return buildMedalCircle(
-                        medal,
-                        medalSize,
-                        medalPadding,
-                        isUnlocked,
+                      return SizedBox(
+                        width: medalSize,
+                        child: Text(
+                          medal['label'] as String,
+                          style: GoogleFonts.dmSans(
+                            fontSize: labelFontSize,
+                            color: Colors.white,
+                            fontWeight:
+                                isUnlocked ? FontWeight.w600 : FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
                       );
                     }).toList(),
                   ),
                 ],
+              );
+            },
+          ),
+
+          // Progress banner
+          if (xpNeeded > 0) ...[
+            SizedBox(height: verticalSpacing),
+            Center(
+              child: Container(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isDesktop ? 20.0 : (isTablet ? 18.0 : 16.0),
+                  vertical: isDesktop ? 14.0 : (isTablet ? 13.0 : 12.0),
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(
+                    isDesktop ? 14.0 : (isTablet ? 13.0 : 12.0),
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Earn $xpNeeded XP to unlock $nextLevelName/$nextLevelType',
+                        style: GoogleFonts.dmSans(
+                          fontSize: isDesktop ? 16.0 : (isTablet ? 15.0 : 14.0),
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Icon(
+                      Icons.rocket_launch,
+                      color: Colors.white,
+                      size: isDesktop ? 20.0 : (isTablet ? 19.0 : 18.0),
+                    ),
+                  ],
+                ),
               ),
             ),
-            SizedBox(height: labelSpacing),
-
-            // Labels row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: medals.map((medal) {
-                final xpThreshold = medal['xpThreshold'] as int;
-                final isUnlocked = userXP >= xpThreshold;
-
-                return SizedBox(
-                  width: medalSize,
-                  child: Text(
-                    medal['label'] as String,
-                    style: GoogleFonts.dmSans(
-                      fontSize: labelFontSize,
-                      color: Colors.white,
-                      fontWeight:
-                          isUnlocked ? FontWeight.w600 : FontWeight.w500,
-                    ),
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                );
-              }).toList(),
-            ),
           ],
-        );
-      },
-    );
-  }
-
-  // Build individual medal circle
-  Widget buildMedalCircle(
-    Map<String, dynamic> medal,
-    double size,
-    double padding,
-    bool isUnlocked,
-  ) {
-    final fillColor = medal['fillColor'] as Color;
-    final strokeColor = medal['strokeColor'] as Color;
-
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: isUnlocked ? fillColor : Colors.white,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: isUnlocked ? strokeColor : Colors.white.withOpacity(0.5),
-          width: size > 50 ? 3 : 2,
-        ),
-      ),
-      padding: EdgeInsets.all(padding),
-      child: Opacity(
-        opacity: isUnlocked ? 1.0 : 0.5,
-        child: Image.asset(
-          'assets/medals/${medal['image']}',
-          fit: BoxFit.contain,
-          errorBuilder: (context, error, stackTrace) {
-            return Icon(
-              Icons.emoji_events_outlined,
-              color: isUnlocked ? strokeColor : Colors.grey.shade400,
-              size: size * 0.5,
-            );
-          },
-        ),
+        ],
       ),
     );
   }

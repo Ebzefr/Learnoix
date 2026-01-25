@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../utils/constants.dart';
-import '../screens/library/generate_modal.dart';
 import '../screens/home/home_screen.dart';
 import '../screens/library/library_screen.dart';
 import '../screens/tasks/task_screen.dart';
 import '../screens/profile/profile_screen.dart';
 
-// Sidebar navigation for desktop
-class SidebarNavigation extends StatelessWidget {
+// Navigation Rail for tablets - compact vertical navigation
+class RailNavigation extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onIndexChanged;
 
-  const SidebarNavigation({
+  const RailNavigation({
     super.key,
     required this.selectedIndex,
     required this.onIndexChanged,
@@ -66,7 +65,7 @@ class SidebarNavigation extends StatelessWidget {
     }
 
     return Container(
-      width: 180,
+      width: 80,
       decoration: BoxDecoration(
         color: cardColor,
         boxShadow: [
@@ -84,14 +83,24 @@ class SidebarNavigation extends StatelessWidget {
           // Logo
           Image.asset(
             AppAssets.logo,
-            width: 50,
-            height: 50,
-            errorBuilder: (context, error, stackTrace) => Text(
-              'Lx',
-              style: GoogleFonts.dmSans(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+            width: 40,
+            height: 40,
+            errorBuilder: (context, error, stackTrace) => Container(
+              width: 40,
+              height: 40,
+              decoration: BoxDecoration(
+                color: AppColors.primary.withOpacity(0.1),
+                shape: BoxShape.circle,
+              ),
+              child: Center(
+                child: Text(
+                  'Lx',
+                  style: GoogleFonts.dmSans(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                ),
               ),
             ),
           ),
@@ -157,68 +166,42 @@ class SidebarNavigation extends StatelessWidget {
         navigateToScreen(context, index);
       },
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
+          color: isSelected
+              ? AppColors.primary.withOpacity(0.1)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Row(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
-              isSelected ? filledIcon : outlinedIcon,
-              color: isSelected ? Colors.white : inactiveColor,
-              size: 22,
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                color: isSelected ? AppColors.primary : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Icon(
+                isSelected ? filledIcon : outlinedIcon,
+                color: isSelected ? Colors.white : inactiveColor,
+                size: 28,
+              ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(height: 6),
             Text(
               label,
               style: GoogleFonts.dmSans(
-                fontSize: 14,
-                color: isSelected ? Colors.white : inactiveColor,
+                fontSize: 11,
+                color: isSelected ? AppColors.primary : inactiveColor,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
               ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// Desktop floating action button
-class DesktopFAB extends StatelessWidget {
-  const DesktopFAB({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => GenerateModal.show(context),
-      child: Container(
-        width: 64,
-        height: 64,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              AppColors.primary,
-              AppColors.primary.withOpacity(0.8),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          shape: BoxShape.circle,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.primary.withOpacity(0.4),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: const Icon(
-          Icons.add_rounded,
-          color: Colors.white,
-          size: 40,
         ),
       ),
     );
